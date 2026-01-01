@@ -32,7 +32,7 @@ PRICE_DONE      DB 13,10,'Price updated.',13,10,'$'
 
 AUDIT_HEADER    DB 13,10,'Low Stock Audit:',13,10,'$'
 WARN_TEXT       DB ' - LOW STOCK$'
-MIN_STOCK       DB 5
+MIN_STOCK       DW 5
 
 TOTAL_HEADER    DB 13,10,'Total inventory value: $'
 
@@ -46,8 +46,8 @@ Item5           DB 'Juice$'
 
 ProductPtrs     DW OFFSET Item1, OFFSET Item2, OFFSET Item3, OFFSET Item4, OFFSET Item5
 
-StockArray      DB 10, 8, 4, 6, 3
-PriceArray      DB 5, 4, 7, 3, 6
+StockArray      DW 10, 8, 4, 6, 3
+PriceArray      DW 5, 4, 7, 3, 6
 
 GRAND_TOTAL     DW 0
 
@@ -177,16 +177,14 @@ PD_LOOP:
     MOV AH,09H
     INT 21H
 
-    MOV AL, StockArray[DI]
-    XOR AH,AH
+    MOV AX, StockArray[DI]
     CALL PrintNum
 
     LEA DX, DASH_PRICE_SEP
     MOV AH,09H
     INT 21H
 
-    MOV AL, PriceArray[DI]
-    XOR AH,AH
+    MOV AX, PriceArray[DI]
     CALL PrintNum
 
     LEA DX, CRLF
@@ -230,11 +228,11 @@ AddInventory PROC
     INT 21H
 
     CALL ReadNumber
-    MOV DL, AL
+    MOV DX, AX
 
-    MOV AL, StockArray[BX]
-    ADD AL, DL
-    MOV StockArray[BX], AL
+    MOV AX, StockArray[BX]
+    ADD AX, DX
+    MOV StockArray[BX], AX
 
     LEA DX, ADD_DONE
     MOV AH,09H
@@ -280,7 +278,7 @@ UpdatePrice PROC
     CALL ReadNumber
     MOV SI, OFFSET PriceArray
     ADD SI, BX
-    MOV [SI], AL
+    MOV [SI], AX
 
     LEA DX, PRICE_DONE
     MOV AH,09H
@@ -317,8 +315,8 @@ LowStockAudit PROC
     XOR DI,DI
 
 LS_LOOP:
-    MOV AL, StockArray[DI]
-    CMP AL, [MIN_STOCK]
+    MOV AX, StockArray[DI]
+    CMP AX, [MIN_STOCK]
     JGE LS_SKIP
 
     MOV BX, ProductPtrs[SI]
@@ -362,9 +360,9 @@ TotalValuation PROC
     XOR DI,DI
 
 TV_LOOP:
-    MOV AL, PriceArray[SI]
-    MOV BL, StockArray[DI]
-    MUL BL
+    MOV AX, PriceArray[SI]
+    MOV BX, StockArray[DI]
+    MUL BX
     ADD GRAND_TOTAL, AX
     INC SI
     INC DI
