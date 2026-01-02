@@ -177,14 +177,14 @@ PD_LOOP:
     MOV AH,09H
     INT 21H
 
-    MOV AX, StockArray[DI]
+    MOV AX, StockArray[SI]
     CALL PrintNum
 
     LEA DX, DASH_PRICE_SEP
     MOV AH,09H
     INT 21H
 
-    MOV AX, PriceArray[DI]
+    MOV AX, PriceArray[SI]
     CALL PrintNum
 
     LEA DX, CRLF
@@ -217,10 +217,12 @@ AddInventory PROC
 
     CALL ReadNumber
     CMP AX,1
-    JB AI_BAD
+    JL AI_BAD
     CMP AX,5
-    JA AI_BAD
+    JG AI_BAD
     DEC AX
+    MOV BL, 2
+    MUL BL
     MOV BX, AX
 
     LEA DX, ADD_PROMPT_QTY
@@ -265,10 +267,12 @@ UpdatePrice PROC
 
     CALL ReadNumber
     CMP AX,1
-    JB UP_BAD
+    JL UP_BAD
     CMP AX,5
-    JA UP_BAD
+    JG UP_BAD
     DEC AX
+    MOV BL, 2
+    MUL BL
     MOV BX, AX
 
     LEA DX, PRICE_PROMPT_NEW
@@ -276,9 +280,7 @@ UpdatePrice PROC
     INT 21H
 
     CALL ReadNumber
-    MOV SI, OFFSET PriceArray
-    ADD SI, BX
-    MOV [SI], AX
+    MOV PriceArray[BX], AX
 
     LEA DX, PRICE_DONE
     MOV AH,09H
@@ -304,7 +306,6 @@ LowStockAudit PROC
     PUSH CX
     PUSH DX
     PUSH SI
-    PUSH DI
 
     LEA DX, AUDIT_HEADER
     MOV AH,09H
@@ -312,10 +313,9 @@ LowStockAudit PROC
 
     MOV CX,5
     XOR SI,SI
-    XOR DI,DI
 
 LS_LOOP:
-    MOV AX, StockArray[DI]
+    MOV AX, StockArray[SI]
     CMP AX, [MIN_STOCK]
     JGE LS_SKIP
 
@@ -334,10 +334,8 @@ LS_LOOP:
 
 LS_SKIP:
     ADD SI,2
-    INC DI
     LOOP LS_LOOP
 
-    POP DI
     POP SI
     POP DX
     POP CX
