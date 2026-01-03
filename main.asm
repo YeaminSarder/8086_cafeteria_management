@@ -362,8 +362,8 @@ TV_LOOP:
     MOV BX, StockArray[DI]
     MUL BX
     ADD GRAND_TOTAL, AX
-    INC SI
-    INC DI
+    ADD SI, 2
+    ADD DI, 2
     LOOP TV_LOOP
 
     LEA DX, TOTAL_HEADER
